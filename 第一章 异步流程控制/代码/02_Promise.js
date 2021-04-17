@@ -20,6 +20,7 @@
 
 
 const fs = require('fs');
+const path = require('path');
 // const school = [];
 // fs.readFile('./name.txt', 'utf8', function (err, res) {
 //     school.push(res);
@@ -34,31 +35,32 @@ const fs = require('fs');
 
 function read(url, encoding) {
     return new Promise(function (resolve, reject) {
-        fs.readFile(url, encoding, function (err, res) {
+        fs.readFile(path.join(__dirname, url), encoding, function (err, res) {
             if (err) reject(err);
             resolve(res);
         })
     })
 }
 
-// read('./name.txt', 'utf8').then(function (value) {
-//     return read(value, 'utf8');
-// }).then(function (value) {
-//     return read(value + 1, 'utf8');
-// }).then(function (value) {
-//     console.log(value);
-// }).catch(function (err) {
-//     console.log('catch', err);
-// }).then(function (value) {
-//     console.log('then', value);
-//     return Promise.reject('失败了');
-// }).then(null, function (err) {
-//     console.log(err);
-//     throw new Error('错误了');
-// }).then(null, function (err) {
-//     console.log('throw', err);
+read('./name.txt', 'utf8').then(function (value) {
+    return read(value, 'utf8');
+}).then(function (value) {
+    return read(value, 'utf8');
+}).then(function (value) {
+    console.log(value);
+}).catch(function (err) {
+    console.log('catch', err);
+}).then(function (value) {
+    console.log('then', value);
+    return Promise.reject('失败了');
+}).then(null, function (err) {
+    console.log(err);
+    throw new Error('错误了');
+}).then(null, function (err) {
+    console.log('throw', err);
+})
+
+// Promise.all([read(path.join(__dirname, './name.txt'), 'utf8'), read(path.join(__dirname, './address.txt'), 'utf8'), read(path.join(__dirname, './age.txt'), 'utf8')]).then(function (res) {
+//     console.log(res);
 // })
 
-Promise.all([read('./name.txt', 'utf8'), read('./address.txt', 'utf8'), read('./age.txt', 'utf8')]).then(function (res) {
-    console.log(res);
-})

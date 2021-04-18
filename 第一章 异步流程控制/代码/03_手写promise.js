@@ -44,21 +44,43 @@ function resolvePromise(x, promise, resolve, reject) {
     }
     // 如果x是个函数或者是个对象，x就有可能会是个promise
     // null也会被识别成object，所以要单独判断
+    let called;
     if (x !== null && (typeof x === 'function' || typeof x === 'object')) {
         try {
             let then = x.then;
             // 不排除有人故意写{then: 123}的情况
             if (typeof then === 'function') {
+                // 这里一定要用call执行
+                // 因为如果直接then()执行，then函数中的this会指向window
+                // 这个逻辑可能是别人的promise，可能即调用成功也调用失败
                 then.call(x, function (y) {
-                    resolve(y);
+                    if (called) {
+                        return;
+                    }
+                    called = true;
+                    // y可能还是一个promise
+                    // 递归到直到y不是promise为止
+                    resolvePromise(y, promise, resolve, reject);
                 }, function (r) {
+                    if (called) {
+                        return;
+                    }
+                    called = true;
                     reject(r);
                 })
             } else {    // {then: 123}
+                if (called) {
+                    return;
+                }
+                called = true;
                 resolve(x);
             }
         }
         catch (e) {
+            if (called) {
+                return;
+            }
+            called = true;
             reject(e);
         }
     } else {
@@ -68,25 +90,61 @@ function resolvePromise(x, promise, resolve, reject) {
 
 // then返回的一定是一个新的Promise
 Promise.prototype.then = function (onFulfilled, onRejected) {
+    // 实现值的穿透
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : function (data) {
+        return data;
+    }
+
     const that = this;
     const promise2 = new Promise(function (resolve, reject) {
         if (that.status === 'resolved') {
-            // 我们需要把then中成功或是失败的结果获取到
-            // 看一看是不是Promise，如果是Promise就让Promise执行，取到这个Promise最终的执行结果
-            let x = onFulfilled(that.value);
-            // console.log(x);
-            resolvePromise(x, promise2, resolve, reject);
+            // then必须是异步执行的
+            setTimeout(function () {
+                // 可能then中函数执行发生错误
+                try {
+                    // 我们需要把then中成功或是失败的结果获取到
+                    // 看一看是不是Promise，如果是Promise就让Promise执行，取到这个Promise最终的执行结果
+                    let x = onFulfilled(that.value);
+                    // console.log(x);
+                    resolvePromise(x, promise2, resolve, reject);
+                }
+                catch (e) {
+                    reject(e);
+                }
+            }, 0);
         } else if (that.status === 'rejected') {
-            let x = onRejected(that.reason);
-            resolvePromise(x, promise2, resolve, reject);
+            setTimeout(function () {
+                try {
+                    let x = onRejected(that.reason);
+                    resolvePromise(x, promise2, resolve, reject);
+                }
+                catch (e) {
+                    reject(e);
+                }
+
+            }, 0);
         } else if (that.status === 'pending') {
             that.onResolvedCallbacks.push(function () {
-                let x = onFulfilled(that.value);
-                resolvePromise(x, promise2, resolve, reject);
+                setTimeout(function () {
+                    try {
+                        let x = onFulfilled(that.value);
+                        resolvePromise(x, promise2, resolve, reject);
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                }, 0);
             })
             that.onRejectedCallbacks.push(function () {
-                let x = onRejected(that.reason);
-                resolvePromise(x, promise2, resolve, reject);
+                setTimeout(function () {
+                    try {
+                        let x = onRejected(that.reason);
+                        resolvePromise(x, promise2, resolve, reject);
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                }, 0)
             })
         }
     })
@@ -95,5 +153,14 @@ Promise.prototype.then = function (onFulfilled, onRejected) {
     return promise2;
 }
 
-module.exports = Promise;
+Promise.defer = Promise.deferred = function () {
+    let deferred = {}
 
+    deferred.promise = new Promise((resolve, reject) => {
+        deferred.resolve = resolve
+        deferred.reject = reject
+    })
+    return deferred
+}
+
+module.exports = Promise;

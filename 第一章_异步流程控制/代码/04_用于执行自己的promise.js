@@ -10,6 +10,37 @@ const p = new Promise1(function (resolve, reject) {
     // throw new Error('错误了')
 })
 
+p.then(function () {
+    function fn() { console.log(111); }
+    return fn
+}).then(function (value) {
+    console.log('value', value);
+}, function (reason) {
+    console.log('err', reason);
+})
+
+// p.then(function (value) {
+//     console.log('suc1', value);
+//     return value;
+// }).then(function (value) {
+//     console.log('suc3', value);
+// }, function (reason) {
+//     console.log('err', reason);
+// })
+
+
+
+// p.then(function (value) {
+//     console.log('suc2', value);
+// }, function (reason) {
+//     console.log('err', reason);
+// }).then(function (value) {
+//     console.log('suc4', value);
+// }, function (reason) {
+//     console.log('err', reason);
+// })
+
+
 
 // p.then(function (data) {
 //     // console.log('data1', data);
@@ -47,6 +78,6 @@ const p = new Promise1(function (resolve, reject) {
 //     console.log('err', err);
 // })
 
-p.then().then().then().then(function(value) {
-    console.log(value);
-})
+// p.then().then().then().then(function (value) {
+//     console.log(value);
+// })

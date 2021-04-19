@@ -46,7 +46,7 @@ function resolvePromise(x, promise, resolve, reject) {
     // null也会被识别成object，所以要单独判断
     let called;
     if (x !== null && (typeof x === 'function' || typeof x === 'object')) {
-        try {
+        try {   // 这里try可能因为用了别人的promise，别人的then是通过getter定义的，取x.then可能报错
             let then = x.then;
             // 不排除有人故意写{then: 123}的情况
             if (typeof then === 'function') {
@@ -93,6 +93,10 @@ Promise.prototype.then = function (onFulfilled, onRejected) {
     // 实现值的穿透
     onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : function (data) {
         return data;
+    }
+
+    onRejected = typeof onRejected === 'function' ? onRejected : function (err) {
+        throw err;
     }
 
     const that = this;

@@ -1,20 +1,23 @@
-// const Promise = require('./05_完善Promise')
-
 // const Promise = require("./05_完善Promise");
 
 const fs = require('fs');
 const path = require('path');
 
 const p = new Promise(function (resolve, reject) {
-    resolve(1000);
+    // resolve(1000);
+    reject(100);
 })
 
 // p.then(function (value) {
 //     throw new Error('错误');
-// }).catch(function (err) {
-//     console.log(err);
+// }, function (reason) {
+//     return 111;
 // }).finally(function () {
-//     console.log(arguments);
+//     console.log(111);
+// }).then(function (value) {
+//     console.log('val', value);
+// }, function (reason) {
+//     console.log(reason);
 // })
 
 // p.then(function (value) {
@@ -36,9 +39,35 @@ function read(url, encoding) {
     })
 }
 
+// Promise.all = function (promises) {
+//     return new Promise(function (resolve, reject) {
+//         let arr = [];
+//         let currentIndex = 0;
+//         function processData(index, data) {
+//             arr[index] = data;
+//             currentIndex++;
+//             if (currentIndex === promises.length) {
+//                 resolve(arr);
+//             }
+//         }
+//         for (let i = 0; i < promises.length; i++) {
+//             promises[i].then(function (value) {
+//                 processData(i, value);
+//             }, reject)
+//         }
+//     })
+// }
+
 Promise.all([read('./address.txt', 'utf8'), read('./age.txt', 'utf8'), read('./name.txt', 'utf8')])
     .then(function (data) {
         console.log(data);
     }, function (err) {
         console.log(err);
     })
+
+// Promise.race([read('./address.txt', 'utf8'), read('./age.txt', 'utf8'), read('./name.txt', 'utf8')])
+//     .then(function (data) {
+//         console.log(data);
+//     }, function (err) {
+//         console.log(err);
+//     })

@@ -153,17 +153,16 @@ Promise.prototype.then = function (onFulfilled, onRejected) {
         }
     })
 
-
     return promise2;
 }
 
-Promise.prototype.resolve = function (value) {
+Promise.resolve = function (value) {
     return new Promise(function (resolve, reject) {
         resolve(value);
     })
 }
 
-Promise.prototype.reject = function (reason) {
+Promise.reject = function (reason) {
     return new Promise(function (resolve, reject) {
         reject(reason);
     })
@@ -186,6 +185,29 @@ Promise.prototype.finally = function (callback) {
             throw reason;
         })
     });
+}
+
+Promise.all = function (promises) {
+    return new Promise(function (resolve, reject) {
+        let arr = [];
+        let currentIndex = 0;
+        function processData(index, data) {
+            arr[index] = data;
+            currentIndex++;
+            if (currentIndex === promises.length) {
+                resolve(arr);
+            }
+        }
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(function (value) {
+                processData(i, value);
+            }, reject)
+        }
+    })
+}
+
+Promise.race = function() {
+    
 }
 
 Promise.defer = Promise.deferred = function () {

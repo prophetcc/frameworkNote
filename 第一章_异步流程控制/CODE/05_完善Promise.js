@@ -206,8 +206,12 @@ Promise.all = function (promises) {
     })
 }
 
-Promise.race = function() {
-    
+Promise.race = function (promises) {
+    return new Promise(function (resolve, reject) {
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(resolve, reject);
+        }
+    })
 }
 
 Promise.defer = Promise.deferred = function () {

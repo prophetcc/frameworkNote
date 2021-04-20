@@ -1,12 +1,13 @@
-// const Promise = require("./05_完善Promise");
+const Promise = require("./05_完善Promise");
+const bluebird = require('bluebird');
 
 const fs = require('fs');
 const path = require('path');
 
-const p = new Promise(function (resolve, reject) {
-    // resolve(1000);
-    reject(100);
-})
+// const p = new Promise(function (resolve, reject) {
+//     // resolve(1000);
+//     reject(100);
+// })
 
 // p.then(function (value) {
 //     throw new Error('错误');
@@ -30,14 +31,14 @@ const p = new Promise(function (resolve, reject) {
 //     console.log('err', reason);
 // })
 
-function read(url, encoding) {
-    return new Promise(function (resolve, reject) {
-        fs.readFile(path.join(__dirname, url), encoding, function (err, res) {
-            if (err) reject(err);
-            resolve(res);
-        })
-    })
-}
+// function read(url, encoding) {
+//     return new Promise(function (resolve, reject) {
+//         fs.readFile(path.join(__dirname, url), encoding, function (err, res) {
+//             if (err) reject(err);
+//             resolve(res);
+//         })
+//     })
+// }
 
 // Promise.all = function (promises) {
 //     return new Promise(function (resolve, reject) {
@@ -58,14 +59,21 @@ function read(url, encoding) {
 //     })
 // }
 
-Promise.all([read('./address.txt', 'utf8'), read('./age.txt', 'utf8'), read('./name.txt', 'utf8')])
-    .then(function (data) {
-        console.log(data);
-    }, function (err) {
-        console.log(err);
-    })
+// Promise.allSettled([read('./address.txt', 'utf8'), read('./age.txt', 'utf8'), read('./name.txt', 'utf8')])
+//     .then(function (data) {
+//         console.log(data);
+//     }, function (err) {
+//         console.log(err);
+//     })
 
 // Promise.race([read('./address.txt', 'utf8'), read('./age.txt', 'utf8'), read('./name.txt', 'utf8')])
+//     .then(function (data) {
+//         console.log(data);
+//     }, function (err) {
+//         console.log(err);
+//     })
+
+// Promise.all([1, 2, 3])
 //     .then(function (data) {
 //         console.log(data);
 //     }, function (err) {

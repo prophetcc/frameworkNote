@@ -476,3 +476,140 @@ Promise.all([
   }
 );
 ```
+
+## 实现 Promise 方法
+
+### Promise.resolve
+
+```js
+Promise.resolve = function (value) {
+  return new Promise(function (resolve, reject) {
+    resolve(value);
+  });
+};
+```
+
+### Promise.reject
+
+```js
+Promise.reject = function (reason) {
+  return new Promise(function (resolve, reject) {
+    reject(reason);
+  });
+};
+```
+
+### Promise.prototype.catch
+
+```js
+Promise.prototype.catch = function (errFn) {
+  return this.then(null, errFn);
+};
+```
+
+- catch 实际上就是特殊的 then 方法
+
+### Promise.prototype.finally
+
+```js
+Promise.prototype.finally = function (callback) {
+  return this.then(
+    function (value) {
+      // callback可能里面还有Promise，因此要用resolve处理
+      return Promise.resolve(callback()).then(function () {
+        return value;
+      });
+    },
+    function (reason) {
+      return Promise.resolve(callback()).then(function () {
+        throw reason;
+      });
+    }
+  );
+};
+```
+
+- finally 就是两边都执行
+- callback 可能里面还有 Promise，因此要用 resolve 处理
+
+### Promise.all
+
+```js
+Promise.all = function (promises) {
+  return new Promise(function (resolve, reject) {
+    let arr = [];
+    let currentIndex = 0;
+    function processData(index, data) {
+      arr[index] = data;
+      currentIndex++;
+      if (currentIndex === promises.length) {
+        resolve(arr);
+      }
+    }
+    for (let i = 0; i < promises.length; i++) {
+      promises[i].then(function (value) {
+        processData(i, value);
+      }, reject);
+    }
+  });
+};
+```
+
+### Promise.race
+
+```js
+Promise.race = function (promises) {
+  return new Promise(function (resolve, reject) {
+    for (let i = 0; i < promises.length; i++) {
+      promises[i].then(resolve, reject);
+    }
+  });
+};
+```
+
+- race 只要有一个成功就成功，只要有一个失败就失败
+
+## bluebird
+
+- 我们可以使用别人封装的 Promise 方法
+
+```js
+const bluebird = require("bluebird");
+
+const fs = require("fs");
+const path = require("path");
+
+const read = bluebird.promisify(fs.readFile);
+
+read(__dirname + "/address.txt", "utf8").then(function (value) {
+  console.log(value); // expecting result: age.txt
+});
+
+bluebird.promisifyAll(fs);
+
+fs.readFileAsync(__dirname + "/address.txt", "utf8").then(function (value) {
+  console.log(value); // expecting result: age.txt
+});
+```
+
+## 自己实现 bluebird
+
+```js
+const bluebird = {
+  promisify = function (fn) {
+    return function (...args) {
+      return new Promise(function (resolve, reject) {
+        fn(...args, function (err, res) {
+            if (err) reject(err);
+            resolve(res);
+        })
+      })
+    }
+  },
+  promisifyAll = function (obj) {
+    for (let key in obj) {
+      obj[key + 'Async'] = this.promisify(obj[key]);
+    }
+  }
+}
+```

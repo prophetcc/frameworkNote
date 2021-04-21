@@ -3,11 +3,8 @@ let likeArray = {
         let index = 0;
         let that = this;
         return {
-            new() {
-                return {
-                    done: index === that.length,
-                    value: that[index++]
-                }
+            next() {
+                return { done: index === that.length, value: that[index++] }
             }
         }
     }

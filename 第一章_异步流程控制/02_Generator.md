@@ -156,3 +156,92 @@ r.next("无效"); // 这一次传递的参数是无效的
 r.next("aaa");
 r.next("bbb");
 ```
+
+### 使用生成器顺序读取文件
+
+```js
+const fs = require("fs");
+const bluebird = require("bluebird");
+
+const read = bluebird.promisify(fs.readFile);
+
+function* gen() {
+  const address = yield read(__dirname + "/name.txt", "utf8");
+  const age = yield read(__dirname + address, "utf8");
+  const result = yield read(__dirname + age, "utf8");
+  return result;
+}
+
+const it = gen();
+let { value, done } = it.next(); // value即每次read执行完返回的Promise，可以接then方法
+value.then(function (data) {
+  let { value, done } = it.next(data);
+  value.then(function (data) {
+    let { value, done } = it.next(data);
+    value.then(function (data) {
+      console.log(data); // expecting result: 10
+    });
+  });
+});
+```
+
+### npm i co
+
+- 上述代码可以用 co 实现
+
+```js
+const fs = require("fs");
+const bluebird = require("bluebird");
+
+const read = bluebird.promisify(fs.readFile);
+
+function* gen() {
+  const address = yield read(__dirname + "/name.txt", "utf8");
+  const age = yield read(__dirname + address, "utf8");
+  const result = yield read(__dirname + age, "utf8");
+  return result;
+}
+
+const co = require("co");
+
+co(gen()).then((data) => {
+  console.log(data);
+});
+```
+
+### 封装自己的 co
+
+```js
+const fs = require("fs");
+const bluebird = require("bluebird");
+const { resolve } = require("bluebird");
+
+const read = bluebird.promisify(fs.readFile);
+
+function* gen() {
+  const address = yield read(__dirname + "/name.txt", "utf8");
+  const age = yield read(__dirname + address, "utf8");
+  const result = yield read(__dirname + age, "utf8");
+  // return result;
+}
+
+function co(it) {
+  return new Promise((resolve, reject) => {
+    function next(data) {
+      const { value, done } = it.next(data);
+      if (!done) {
+        value.then(function (data) {
+          next(data);
+        }, reject);
+      } else {
+        resolve(data);
+      }
+    }
+    next();
+  });
+}
+
+co(gen()).then((data) => {
+  console.log(data);
+});
+```

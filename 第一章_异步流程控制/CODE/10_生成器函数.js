@@ -26,36 +26,40 @@
 // console.log(i);
 
 
-// function* fib(max) {
-//     var a = 0, b = 1, n = 0;
-//     while (n < max) {
-//         yield a;
-//         [a, b] = [b, a + b];
-//         n++;
-//     }
-// }
-
-// const f = fib(5);
-// let i = f.next();
-// console.log(i);
-// i = f.next();
-// console.log(i);
-// i = f.next();
-// console.log(i);
-// i = f.next();
-// console.log(i);
-
-
-function* gen() {
-    const a = yield 1;
-    console.log(a);
-    const b = yield 2;
-    console.log(b);
-    const c = yield 3;
-    console.log(c);
+function* fib(max) {
+    var a = 0, b = 1, n = 0;
+    while (n < max) {
+        yield a;
+        [a, b] = [b, a + b];
+        n++;
+    }
 }
 
-const r = gen();
-r.next("无效");
-r.next('aaa');
-r.next('bbb');
+const f = fib(5);
+let i = f.next();
+console.log(i);
+i = f.next();
+console.log(i);
+i = f.next();
+console.log(i);
+i = f.next();
+console.log(i);
+i = f.next();
+console.log(i);
+i = f.next();
+console.log(i);
+
+
+// function* gen() {
+//     const a = yield 1;
+//     console.log(a);
+//     const b = yield 2;
+//     console.log(b);
+//     const c = yield 3;
+//     console.log(c);
+// }
+
+// const r = gen();
+// r.next("无效");
+// r.next('aaa');
+// r.next('bbb');

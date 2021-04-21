@@ -106,3 +106,53 @@ console.log(i); // expecting result: { value: 2, done: false }
 i = r.next();
 console.log(i); // expecting result: { value: 3, done: false }
 ```
+
+- 下面代码执行后结果为
+  undefined
+  undefined
+- 因为第一次 next()后，yield 1 执行完就结束了，没有把值给 a，也没有执行输出 a 的语句
+- 第二次 next()后才会输出 a，a 的值因为没有赋值所以是 undifined
+- 第二次 next()执行完 yield 2 就停止
+
+```js
+function* gen() {
+  const a = yield 1;
+  console.log(a);
+  const b = yield 2;
+  console.log(b);
+  const c = yield 3;
+  console.log(c);
+}
+
+const r = gen();
+r.next();
+r.next();
+r.next();
+```
+
+- 上面代码的执行顺序大致如下图所示：
+
+  ![avatar](/images/01.png)
+
+- 下面代码的执行结果为：
+  aaa
+  bbb
+- 当在 next 中传递参数时
+- 第一次 next 传递的参数是无效的
+- 第二次 next 传递的参数会返回给第一次 yeild 前面的 a
+
+```js
+function* gen() {
+  const a = yield 1;
+  console.log(a);
+  const b = yield 2;
+  console.log(b);
+  const c = yield 3;
+  console.log(c);
+}
+
+const r = gen();
+r.next("无效"); // 这一次传递的参数是无效的
+r.next("aaa");
+r.next("bbb");
+```

@@ -56,9 +56,6 @@ function* gen() {
 }
 
 const r = gen();
-let i = r.next();
-console.log(i);
-i = r.next();
-console.log(i);
-i = r.next();
-console.log(i);
+r.next("无效");
+r.next('aaa');
+r.next('bbb');

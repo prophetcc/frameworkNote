@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #box {
+            position: relative;
+        }
+
+        .ball {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: red;
+            position: absolute;
+            left: 0;
+        }
+
+        .ball1 {
+            top: 100px;
+        }
+
+        .ball2 {
+            top: 250px;
+        }
+
+        .ball3 {
+            top: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="box">
+        <div class="ball ball1"></div>
+        <div class="ball ball2"></div>
+        <div class="ball ball3"></div>
+    </div>
+
+    <script>
+        const $ = document.querySelector.bind(document);
+
+        function move(ele, target) {
+            return new Promise(function (resolve, reject) {
+                let left = 0;
+                const timer = setInterval(function () {
+                    if (left >= target) {
+                        clearInterval(timer);
+                        return resolve();
+                    }
+                    left++;
+                    ele.style.left = left + 'px';
+                }, 6)
+            })
+        }
+
+        function* gen() {
+            yield move($('.ball1'), 500)
+            yield move($('.ball2'), 500)
+            yield move($('.ball3'), 500)
+        }
+
+        function co(it) {
+            return new Promise((resolve, reject) => {
+                function next(data) {
+                    const { value, done } = it.next(data)
+                    if (!done) {
+                        value.then(function (data) {
+                            next(data);
+                        }, reject)
+                    } else {
+                        resolve(data)
+                    }
+                }
+                next();
+            })
+        }
+
+        co(gen()).then(() => {
+            alert('hello');
+        })
+    </script>
+</body>
+
+</html>

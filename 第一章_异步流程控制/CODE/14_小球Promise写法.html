@@ -50,7 +50,6 @@
                 const timer = setInterval(function () {
                     if (left >= target) {
                         clearInterval(timer);
-                        // throw new Error('错误');
                         return resolve();
                     }
                     left++;
@@ -73,10 +72,7 @@
             return move($('.ball3'), 500);
         }).then(() => {
             return alert('hello')
-        }).catch(function (err) {
-            console.log(err);
         })
-
     </script>
 </body>
 
